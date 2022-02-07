@@ -30,16 +30,21 @@ func (s *UnitTestSuite) AfterTest(suiteName, testName string) {
 
 func (s *UnitTestSuite) Test_Workflow_Success() {
 	raised_event := &Event{Status: "To Do"}
-	update_event := &Event{Status: "In Progress"}
+	in_progress_event := &Event{Status: "In Progress"}
+	in_review_event := &Event{Status: "In Review"}
 	done_event := &Event{Status: "Done"}
 	s.env.RegisterWorkflow(Workflow)
 	s.env.RegisterActivity(ActivityOne)
 	s.env.RegisterActivity(ActivityTwo)
 	s.env.OnActivity(ActivityOne, mock.Anything, raised_event).Return("created_id", nil)
-	s.env.OnActivity(ActivityTwo, mock.Anything, update_event).Return(nil)
+	s.env.OnActivity(ActivityTwo, mock.Anything, in_progress_event).Return(nil)
+	s.env.OnActivity(ActivityTwo, mock.Anything, in_review_event).Return(nil)
 	s.env.OnActivity(ActivityTwo, mock.Anything, done_event).Return(nil)
 	s.env.RegisterDelayedCallback(func() {
-		s.env.SignalWorkflow(UPDATE_CHANNEL, update_event)
+		s.env.SignalWorkflow(UPDATE_CHANNEL, in_progress_event)
+	}, time.Minute)
+	s.env.RegisterDelayedCallback(func() {
+		s.env.SignalWorkflow(UPDATE_CHANNEL, in_review_event)
 	}, time.Minute)
 	s.env.RegisterDelayedCallback(func() {
 		s.env.SignalWorkflow(UPDATE_CHANNEL, done_event)
