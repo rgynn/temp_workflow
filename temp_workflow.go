@@ -46,11 +46,6 @@ func Workflow(ctx workflow.Context, raised_event *Event) error {
 	return workflow.NewContinueAsNewError(ctx, Workflow, raised_event)
 }
 
-func ChildWorkflow(ctx workflow.Context, update_event *Event) error {
-
-	return nil
-}
-
 func ActivityOne(ctx context.Context, e *Event) (string, error) {
 	return "created_id", nil
 }
